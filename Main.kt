@@ -19,5 +19,3 @@ fun main() {
     println(message.msgEnd)
 
 }
-
-
