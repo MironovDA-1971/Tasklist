@@ -2,7 +2,7 @@ package tasklist
 import kotlinx.datetime.*
 
 data class PrintMessage(var arg: Int = 0) {
-    val start = "Input an action (add, print, end):"
+    val start = "Input an action (add, print, edit, delete, end):"
     val msgEnd = "Tasklist exiting!"
     val msgAdd = "Input a new task (enter a blank line to end):"
     val invalidInput = "The input action is invalid"
@@ -19,6 +19,15 @@ data class PrintMessage(var arg: Int = 0) {
     val priorityList = listOf("C", "H", "N", "L")
     val errorDate = "The input date is invalid"
     val errorTime = "The input time is invalid"
+    val delete = "delete"
+    var maxNumber = 0
+    val numDel = "Input the task number (1-$maxNumber):"
+    val invalidTaskNumber = "Invalid task number"
+    val taskDel = "The task is deleted"
+    val inpFieldToEdit = "Input a field to edit (priority, date, time, task):"
+    val invalidField = "Invalid field"
+    val okChanged = "The task is changed"
+    val edit = "edit"
 }
 
 fun inputToString(message: PrintMessage, taskList: MutableList<String>) {
@@ -74,8 +83,30 @@ fun inputTime(message: PrintMessage): String  {
     }
 }
 
-fun printTaskList(taskList: MutableList<String>) {
-    for (i in 0..taskList.lastIndex) {
-        println((i + 1).toString().padEnd(3) + taskList[i])
+fun printTaskList(message: PrintMessage, taskList: MutableList<String>): Int {
+    var num = 0
+    if (taskList.isNotEmpty()) {
+        for (i in 0..taskList.lastIndex) {
+            println((++num).toString().padEnd(3) + taskList[i])
+        }
     }
+    else println(message.printNoTask)
+    return num
+}
+
+fun deleteTask(message: PrintMessage, taskList: MutableList<String>) {
+    val num = printTaskList(message, taskList)
+    if (num > 0) {
+        message.maxNumber = num
+        println(message.numDel)
+        val delNum = readln().toInt() - 1
+        if (delNum in 0..num) {
+            taskList.drop(delNum)
+        } else println(message.invalidTaskNumber)
+    }
+}
+
+fun editTask(message: PrintMessage, taskList: MutableList<String>) {
+    val num = printTaskList(message, taskList)
+    message.maxNumber = num
 }

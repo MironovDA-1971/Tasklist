@@ -8,10 +8,9 @@ fun main() {
         println(message.start)
         when (readln().trim().lowercase()) {
             message.add -> inputToString(message, taskList)
-            message.print -> {
-                if (taskList.isNotEmpty()) printTaskList(taskList)
-                else println(message.printNoTask)
-            }
+            message.print -> printTaskList(message, taskList)
+            message.delete -> deleteTask(message, taskList)
+            message.edit -> editTask(message, taskList)
             message.end -> break
             else -> println(message.invalidInput)
         }
