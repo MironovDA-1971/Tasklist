@@ -2,7 +2,7 @@ package tasklist
 import kotlinx.datetime.*
 import java.time.LocalTime
 
-data class PrintMessage(var arg: Int = 0) {
+data class PrintMessage(var maxNumber: Int = 0) {
     val start = "Input an action (add, print, edit, delete, end):"
     val msgEnd = "Tasklist exiting!"
     val msgAdd = "Input a new task (enter a blank line to end):"
@@ -21,7 +21,6 @@ data class PrintMessage(var arg: Int = 0) {
     val errorDate = "The input date is invalid"
     val errorTime = "The input time is invalid"
     val delete = "delete"
-    var maxNumber: Int = 0
     fun numDel() = "Input the task number (1-$maxNumber):"
     val invalidTaskNumber = "Invalid task number"
     val taskDel = "The task is deleted"
@@ -119,46 +118,39 @@ fun printTaskList(message: PrintMessage, taskList: MutableList<MutableMap<String
 }
 
 fun deleteTask(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>) {
-    val num = printTaskList(message, taskList)
-    message.maxNumber = num
-    if (num > 0) {
-        while (true) {
-            println(message.numDel())
-            try {
-                val delNum = readln().toInt() - 1
-                    taskList.removeAt(delNum)
-                    println(message.taskDel)
-                    break
-            } catch (e: Exception) {
-                println(message.invalidTaskNumber)
-            }
+    message.maxNumber = printTaskList(message, taskList)
+    while (message.maxNumber > 0) {
+        println(message.numDel())
+        try {
+            taskList.removeAt(readln().toInt() - 1)
+            println(message.taskDel)
+            break
+        } catch (e: Exception) {
+            println(message.invalidTaskNumber)
         }
     }
 }
 
 fun editTask(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>) {
-    val num = printTaskList(message, taskList)
-    message.maxNumber = num
-    if (num > 0) {
-        while (true) {
-            println(message.numDel())
-            try {
-                val edtTask = taskList[readln().toInt() - 1]
-                th@while (true) {
-                    println(message.inpFieldToEdit)
-                    when (readln()) {
-                        "time" -> { edtTask["time"] = inputTime(message); break@th }
-                        "date" -> { edtTask["date"] = inputDate(message); break@th }
-                        "priority" -> { edtTask["priority"] = inputPriority(message); break@th }
-                        "task" -> { stringTask(message, edtTask); break@th }
-                        else -> { println(message.invalidField); continue@th }
-                    }
+    message.maxNumber  = printTaskList(message, taskList)
+    while (message.maxNumber > 0) {
+        println(message.numDel())
+        try {
+            val edtTask = taskList[readln().toInt() - 1]
+            th@while (true) {
+                println(message.inpFieldToEdit)
+                when (readln()) {
+                    "time" -> { edtTask["time"] = inputTime(message); break@th }
+                    "date" -> { edtTask["date"] = inputDate(message); break@th }
+                    "priority" -> { edtTask["priority"] = inputPriority(message); break@th }
+                    "task" -> { stringTask(message, edtTask); break@th }
+                    else -> { println(message.invalidField); continue@th }
                 }
-                println(message.okChanged)
-                break
+            }
+            println(message.okChanged)
+            break
             } catch (e: Exception) {
                 println(message.invalidTaskNumber)
-            }
         }
     }
 }
