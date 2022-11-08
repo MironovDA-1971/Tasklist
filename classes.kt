@@ -29,26 +29,26 @@ data class PrintMessage(var arg: Int = 0) {
     val invalidField = "Invalid field"
     val okChanged = "The task is changed"
     val edit = "edit"
+ //   val editableTags = List(3) {"priority", "date", "time", "task"}
 }
 
 fun curDate(data: String?): String {
     var period = "O"
     val date = data?.split("-")?.toMutableList()
     val taskDate = LocalDate(date?.get(0)!!.toInt(), date[1].toInt(), date[2].toInt())
-    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.of("UTC+0")).date
+    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.of("UTC+4")).date
     val numberOfDays = taskDate.let { currentDate.daysUntil(it) }
     if (numberOfDays == 0) period = "T"
     else if (numberOfDays > 0) period = "I"
     return period
 }
 
-fun inputToString(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
-    var str = ""
+fun inputToString(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>) {
     val mapList = mutableMapOf<String, String>()
     mapList["priority"] = inputPriority(message)     // Priority
     mapList["date"] = inputDate(message)             // Date
     mapList["time"] = inputTime(message)             // Time
-    // mapList["period"] = curDate(mapList["date"])
+    var str = ""
     println(message.msgAdd)
     while (true) {
         val input = readln().trim()
@@ -97,7 +97,7 @@ fun inputTime(message: PrintMessage): String {
     }
 }
 
-fun printTaskList(message: PrintMessage, taskList: MutableList<Map<String, String>>): Int {
+fun printTaskList(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>): Int {
     var num = 0
     if (taskList.isNotEmpty()) {
         for (i in 0..taskList.lastIndex) {
@@ -112,7 +112,7 @@ fun printTaskList(message: PrintMessage, taskList: MutableList<Map<String, Strin
     return num
 }
 
-fun deleteTask(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
+fun deleteTask(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>) {
     val num = printTaskList(message, taskList)
     message.maxNumber = num
     if (num > 0) {
@@ -130,7 +130,59 @@ fun deleteTask(message: PrintMessage, taskList: MutableList<Map<String, String>>
     }
 }
 
-fun editTask(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
+fun editStringTask(message: PrintMessage, mapList: MutableMap<String, String>) {
+    var str = ""
+    println(message.msgAdd)
+    while (true) {
+        val input = readln().trim()
+        if (input.isEmpty()) break
+        str += input + message.newLine + message.threeSpaces
+    }
+    if (str.isEmpty()) println(message.taskIsBlank) else {
+        mapList["task"] = str.dropLast(3)     // Tasks
+    }
+}
+
+fun editTask(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>) {
     val num = printTaskList(message, taskList)
     message.maxNumber = num
+    if (num > 0) {
+        while (true) {
+            println(message.numDel())
+            try {
+                val edtTask = taskList[readln().toInt() - 1]
+                th@while (true) {
+                    println(message.inpFieldToEdit)
+                    when (readln()) {
+                        "time" -> {
+                            edtTask["time"] = inputTime(message)
+                            break@th
+                        }
+                        "date" -> {
+                            edtTask["date"] = inputDate(message)
+                            break@th
+                        }
+                        "priority" -> {
+                            edtTask["priority"] = inputPriority(message)
+                            break@th
+                        }
+                        "task" -> {
+                            editStringTask(message, edtTask)
+                            break@th
+                        }
+                        else -> {
+                            println(message.invalidField)
+                            continue@th
+                        }
+                    }
+                }
+                println(message.okChanged)
+                break
+            } catch (e: Exception) {
+                println(message.invalidTaskNumber)
+            }// finally {
+             //   continue
+             //}
+        }
+    }
 }

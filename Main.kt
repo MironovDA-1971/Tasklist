@@ -2,7 +2,7 @@ package tasklist
 
 fun main() {
     val message = PrintMessage()
-    val taskList = mutableListOf<Map<String, String>>()
+    val taskList = mutableListOf<MutableMap<String, String>>()
 
     while (true) {
         println(message.start)
