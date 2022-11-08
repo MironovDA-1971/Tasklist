@@ -30,19 +30,23 @@ data class PrintMessage(var arg: Int = 0) {
     val edit = "edit"
 }
 
-fun inputToString(message: PrintMessage, taskList: MutableList<String>) {
+fun inputToString(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
     var str = ""
-    val priority = inputPriority(message)     // Priority
-    val date = inputDate(message)             // Date
-    val time = inputTime(message)             // Time
-    val dateTimePriority = "$date $time $priority${message.newLine}${message.threeSpaces}"  // Date Time Priority
+    val mapList = mutableMapOf<String, String>()
+    mapList["date"] = inputDate(message)             // Date
+    mapList["time"] = inputTime(message)             // Time
+    mapList["priority"] = inputPriority(message)     // Priority
+
     println(message.msgAdd)
     while (true) {
         val input = readln().trim()
         if (input.isEmpty()) break
         str += input + message.newLine + message.threeSpaces
     }
-    if (str.isEmpty()) println(message.taskIsBlank) else taskList.add(dateTimePriority + str.dropLast(3))
+    if (str.isEmpty()) println(message.taskIsBlank) else {
+        mapList["task"] = str.dropLast(3)     // Tasks
+        taskList.add(mapList)
+    }
 }
 
 fun inputPriority(message: PrintMessage): String {
@@ -58,7 +62,7 @@ fun inputPriority(message: PrintMessage): String {
 fun inputDate(message: PrintMessage): String {
     while (true) {
         println(message.inputDate)
-        var date = ""
+        var date: String
         try {
             val (y, m, d) = readln().split("-")
             date = LocalDate(y.toInt(), m.toInt(), d.toInt()).toString()
@@ -83,18 +87,21 @@ fun inputTime(message: PrintMessage): String  {
     }
 }
 
-fun printTaskList(message: PrintMessage, taskList: MutableList<String>): Int {
+fun printTaskList(message: PrintMessage, taskList: MutableList<Map<String, String>>): Int {
     var num = 0
     if (taskList.isNotEmpty()) {
         for (i in 0..taskList.lastIndex) {
-            println((++num).toString().padEnd(3) + taskList[i])
+            val dateTimePriority = "${taskList[i]["date"]} " +  // Out Date Time Priority
+                    "${taskList[i]["time"]} " +
+                    "${taskList[i]["priority"]}${message.newLine}${message.threeSpaces}"
+            println((++num).toString().padEnd(3) + dateTimePriority + taskList[i]["string"])
         }
     }
     else println(message.printNoTask)
     return num
 }
 
-fun deleteTask(message: PrintMessage, taskList: MutableList<String>) {
+fun deleteTask(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
     val num = printTaskList(message, taskList)
     if (num > 0) {
         message.maxNumber = num
@@ -106,7 +113,7 @@ fun deleteTask(message: PrintMessage, taskList: MutableList<String>) {
     }
 }
 
-fun editTask(message: PrintMessage, taskList: MutableList<String>) {
+fun editTask(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
     val num = printTaskList(message, taskList)
     message.maxNumber = num
 }
