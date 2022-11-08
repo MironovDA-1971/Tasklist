@@ -1,5 +1,6 @@
 package tasklist
 import kotlinx.datetime.*
+import java.time.LocalTime
 
 data class PrintMessage(var arg: Int = 0) {
     val start = "Input an action (add, print, edit, delete, end):"
@@ -20,8 +21,8 @@ data class PrintMessage(var arg: Int = 0) {
     val errorDate = "The input date is invalid"
     val errorTime = "The input time is invalid"
     val delete = "delete"
-    var maxNumber = 0
-    val numDel = "Input the task number (1-$maxNumber):"
+    var maxNumber: Int = 0
+    fun numDel() = "Input the task number (1-$maxNumber):"
     val invalidTaskNumber = "Invalid task number"
     val taskDel = "The task is deleted"
     val inpFieldToEdit = "Input a field to edit (priority, date, time, task):"
@@ -30,13 +31,24 @@ data class PrintMessage(var arg: Int = 0) {
     val edit = "edit"
 }
 
+fun curDate(data: String?): String {
+    var period = "O"
+    val date = data?.split("-")?.toMutableList()
+    val taskDate = LocalDate(date?.get(0)!!.toInt(), date[1].toInt(), date[2].toInt())
+    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.of("UTC+0")).date
+    val numberOfDays = taskDate.let { currentDate.daysUntil(it) }
+    if (numberOfDays == 0) period = "T"
+    else if (numberOfDays > 0) period = "I"
+    return period
+}
+
 fun inputToString(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
     var str = ""
     val mapList = mutableMapOf<String, String>()
+    mapList["priority"] = inputPriority(message)     // Priority
     mapList["date"] = inputDate(message)             // Date
     mapList["time"] = inputTime(message)             // Time
-    mapList["priority"] = inputPriority(message)     // Priority
-
+    // mapList["period"] = curDate(mapList["date"])
     println(message.msgAdd)
     while (true) {
         val input = readln().trim()
@@ -72,15 +84,13 @@ fun inputDate(message: PrintMessage): String {
         }
     }
 }
-fun inputTime(message: PrintMessage): String  {
+fun inputTime(message: PrintMessage): String {
     while (true) {
-        val hRange = 0..23
-        val mRange = 0..59
         println(message.inputTime)
         try {
             val (h, m) = readln().split(":")
-            if (h.toInt() !in hRange || m.toInt() !in mRange) 2/0
-            return "$h:$m"
+            val time = LocalTime.of(h.toInt(), m.toInt())
+            return time.toString()
         } catch (e: Exception) {
             println(message.errorTime)
         }
@@ -93,8 +103,9 @@ fun printTaskList(message: PrintMessage, taskList: MutableList<Map<String, Strin
         for (i in 0..taskList.lastIndex) {
             val dateTimePriority = "${taskList[i]["date"]} " +  // Out Date Time Priority
                     "${taskList[i]["time"]} " +
-                    "${taskList[i]["priority"]}${message.newLine}${message.threeSpaces}"
-            println((++num).toString().padEnd(3) + dateTimePriority + taskList[i]["string"])
+                    "${taskList[i]["priority"]} " +
+                    "${curDate(taskList[i]["date"])}${message.newLine}${message.threeSpaces}"
+            println((++num).toString().padEnd(3) + dateTimePriority + taskList[i]["task"])
         }
     }
     else println(message.printNoTask)
@@ -103,13 +114,19 @@ fun printTaskList(message: PrintMessage, taskList: MutableList<Map<String, Strin
 
 fun deleteTask(message: PrintMessage, taskList: MutableList<Map<String, String>>) {
     val num = printTaskList(message, taskList)
+    message.maxNumber = num
     if (num > 0) {
-        message.maxNumber = num
-        println(message.numDel)
-        val delNum = readln().toInt() - 1
-        if (delNum in 0..num) {
-            taskList.drop(delNum)
-        } else println(message.invalidTaskNumber)
+        while (true) {
+            println(message.numDel())
+            try {
+                val delNum = readln().toInt() - 1
+                    taskList.removeAt(delNum)
+                    println(message.taskDel)
+                    break
+            } catch (e: Exception) {
+                println(message.invalidTaskNumber)
+            }
+        }
     }
 }
 
