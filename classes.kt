@@ -47,7 +47,7 @@ fun inputToString(message: PrintMessage, taskList: MutableList<MutableMap<String
     mapList["date"] = inputDate(message)             // Date
     mapList["time"] = inputTime(message)             // Time
     val key: Boolean = stringTask(message, mapList)  // Task
-    if (key)taskList.add(mapList)
+    if (key) taskList.add(mapList)
 }
 
 fun stringTask(message: PrintMessage, mapList: MutableMap<String, String>): Boolean {
@@ -89,6 +89,7 @@ fun inputDate(message: PrintMessage): String {
         }
     }
 }
+
 fun inputTime(message: PrintMessage): String {
     while (true) {
         println(message.inputTime)
