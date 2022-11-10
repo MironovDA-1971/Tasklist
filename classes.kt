@@ -12,8 +12,6 @@ data class PrintMessage(var maxNumber: Int = 0) {
     val add = "add"
     val print = "print"
     val end = "end"
-    // val newLine = "\n"
-    // val threeSpaces = "   "
     val taskPriority = "Input the task priority (C, H, N, L):"
     val inputDate = "Input the date (yyyy-mm-dd):"
     val inputTime = "Input the time (hh:mm):"
@@ -28,12 +26,12 @@ data class PrintMessage(var maxNumber: Int = 0) {
     val invalidField = "Invalid field"
     val okChanged = "The task is changed"
     val edit = "edit"
-    val delim = "+----+------------+-------+---+---+--------------------------------------------+"
+    val dividingLine = "+----+------------+-------+---+---+--------------------------------------------+"
     val headDelim = """| N  |    Date    | Time  | P | D |                   Task                     |"""
     val halfDelim = """|    |            |       |   |   |"""
     val priorityColor = mapOf("C" to "\u001B[101m \u001B[0m",
-                              "H" to "\u001B[102m \u001B[0m",
-                              "N" to "\u001B[103m \u001B[0m",
+                              "H" to "\u001B[103m \u001B[0m",
+                              "N" to "\u001B[102m \u001B[0m",
                               "L" to "\u001B[104m \u001B[0m")
     val dueTagColor = mapOf("I" to "\u001B[102m \u001B[0m",
                             "T" to "\u001B[103m \u001B[0m",
@@ -44,7 +42,7 @@ fun curDate(data: String?): String {
     var period = "O"
     val date = data?.split("-")?.toMutableList()
     val taskDate = LocalDate(date?.get(0)!!.toInt(), date[1].toInt(), date[2].toInt())
-    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.of("UTC+4")).date
+    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.of("UTC+0")).date
     val numberOfDays = taskDate.let { currentDate.daysUntil(it) }
     if (numberOfDays == 0) period = "T"
     else if (numberOfDays > 0) period = "I"
@@ -63,13 +61,15 @@ fun inputToString(message: PrintMessage, taskList: MutableList<MutableMap<String
 fun stringTask(message: PrintMessage, mapList: MutableMap<String, String>): Boolean {
     var str = ""
     var key = false
+    val builder = StringBuilder()
     println(message.msgAdd)
     while (true) {
-        val input = readln().trim()
-        if (input.isEmpty()) break
-        // TODO() проверить количество символов в строке и если оно привышает 44 символа
-        //  разбить строку переводами строки - \n
-        str += input + "\n" //+ message.threeSpaces
+        val inputString = readln().trim()
+        if (inputString.isEmpty()) break
+        val list = inputString.chunked(44)
+        list.forEach {
+            str = builder.append("$it\n").toString()
+        }
     }
     if (str.isEmpty()) println(message.taskIsBlank) else {
         mapList["task"] = str //.dropLast(3)      Tasks
@@ -118,23 +118,23 @@ fun inputTime(message: PrintMessage): String {
 fun printTaskList(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>): Int {
     var num = 0
     if (taskList.isNotEmpty()) {
-        println(message.delim) // table header output
+        println(message.dividingLine) // table header output
         println(message.headDelim)
-        println(message.delim)
+        println(message.dividingLine)
         for (i in 0..taskList.lastIndex) {
             val prColor = message.priorityColor[taskList[i]["priority"]]
             val dtColor = message.dueTagColor[curDate(taskList[i]["date"])]
             val date = taskList[i]["date"]
             val time = taskList[i]["time"]
-            val tmpTaskList = taskList[i]["task"]?.split("\n")
+            val tmpTaskList = taskList[i]["task"]?.lines()
             val strNum = (++num).toString().padEnd(3)
 
-            for (i in 0 ..tmpTaskList?.lastIndex!!) {
+            for (i in 0 until tmpTaskList?.lastIndex!!) {
                 val taskString = tmpTaskList[i].padEnd(44) + "|"
                 if (i == 0) println("| $strNum| $date | $time | $prColor | $dtColor |$taskString")
                 else println(message.halfDelim + taskString)
             }
-            println(message.delim)
+            println(message.dividingLine)
         }
     }
     else println(message.printNoTask)
