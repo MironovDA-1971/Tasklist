@@ -12,8 +12,8 @@ data class PrintMessage(var maxNumber: Int = 0) {
     val add = "add"
     val print = "print"
     val end = "end"
-    val newLine = "\n"
-    val threeSpaces = "   "
+    // val newLine = "\n"
+    // val threeSpaces = "   "
     val taskPriority = "Input the task priority (C, H, N, L):"
     val inputDate = "Input the date (yyyy-mm-dd):"
     val inputTime = "Input the time (hh:mm):"
@@ -28,6 +28,16 @@ data class PrintMessage(var maxNumber: Int = 0) {
     val invalidField = "Invalid field"
     val okChanged = "The task is changed"
     val edit = "edit"
+    val delim = "+----+------------+-------+---+---+--------------------------------------------+"
+    val headDelim = """| N  |    Date    | Time  | P | D |                   Task                     |"""
+    val halfDelim = """|    |            |       |   |   |"""
+    val priorityColor = mapOf("C" to "\u001B[101m \u001B[0m",
+                              "H" to "\u001B[102m \u001B[0m",
+                              "N" to "\u001B[103m \u001B[0m",
+                              "L" to "\u001B[104m \u001B[0m")
+    val dueTagColor = mapOf("I" to "\u001B[102m \u001B[0m",
+                            "T" to "\u001B[103m \u001B[0m",
+                            "O" to "\u001B[101m \u001B[0m")
 }
 
 fun curDate(data: String?): String {
@@ -57,10 +67,12 @@ fun stringTask(message: PrintMessage, mapList: MutableMap<String, String>): Bool
     while (true) {
         val input = readln().trim()
         if (input.isEmpty()) break
-        str += input + message.newLine + message.threeSpaces
+        // TODO() проверить количество символов в строке и если оно привышает 44 символа
+        //  разбить строку переводами строки - \n
+        str += input + "\n" //+ message.threeSpaces
     }
     if (str.isEmpty()) println(message.taskIsBlank) else {
-        mapList["task"] = str.dropLast(3)     // Tasks
+        mapList["task"] = str //.dropLast(3)      Tasks
         key = true
     }
     return key
@@ -106,12 +118,23 @@ fun inputTime(message: PrintMessage): String {
 fun printTaskList(message: PrintMessage, taskList: MutableList<MutableMap<String, String>>): Int {
     var num = 0
     if (taskList.isNotEmpty()) {
+        println(message.delim) // table header output
+        println(message.headDelim)
+        println(message.delim)
         for (i in 0..taskList.lastIndex) {
-            val dateTimePriority = "${taskList[i]["date"]} " +  // Out Date Time Priority
-                    "${taskList[i]["time"]} " +
-                    "${taskList[i]["priority"]} " +
-                    "${curDate(taskList[i]["date"])}${message.newLine}${message.threeSpaces}"
-            println((++num).toString().padEnd(3) + dateTimePriority + taskList[i]["task"])
+            val prColor = message.priorityColor[taskList[i]["priority"]]
+            val dtColor = message.dueTagColor[curDate(taskList[i]["date"])]
+            val date = taskList[i]["date"]
+            val time = taskList[i]["time"]
+            val tmpTaskList = taskList[i]["task"]?.split("\n")
+            val strNum = (++num).toString().padEnd(3)
+
+            for (i in 0 ..tmpTaskList?.lastIndex!!) {
+                val taskString = tmpTaskList[i].padEnd(44) + "|"
+                if (i == 0) println("| $strNum| $date | $time | $prColor | $dtColor |$taskString")
+                else println(message.halfDelim + taskString)
+            }
+            println(message.delim)
         }
     }
     else println(message.printNoTask)
