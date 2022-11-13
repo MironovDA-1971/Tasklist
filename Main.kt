@@ -2,9 +2,8 @@ package tasklist
 
 fun main() {
     val message = PrintMessage()
-    val jsonRead = TaskToJson(mutableListOf())
-    val rsJoson = ReadSaveJoson()
-    val taskList = rsJoson.readJson(jsonRead)
+    val file = ReadSaveJson()
+    val taskList = file.readJson()
 
     while (true) {
         println(message.start)
@@ -18,7 +17,6 @@ fun main() {
         }
     }
 
-    val jsonSave = TaskToJson(taskList)
-    rsJoson.saveJson(jsonSave)
+    file.saveJson(taskList)
     println(message.msgEnd)
 }

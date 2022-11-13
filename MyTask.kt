@@ -1,30 +1,30 @@
 package tasklist
 
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.io.File
 import java.io.IOException
 
-class TaskToJson(val taskList: MutableList<MutableMap<String, String>>)
-
-class ReadSaveJoson {
-    private val jsonFile = File("tasklist.json")
+class ReadSaveJson {
+    private val file = File("tasklist.json")
     private val moshi: Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
-    private val taskAdapter: JsonAdapter<TaskToJson> = moshi.adapter(TaskToJson::class.java)
+
+    private val type = Types.newParameterizedType(MutableList::class.java, MutableMap::class.java)
+    private val taskListAdapter = moshi.adapter<MutableList<MutableMap<String, String>>>(type)
 
 
-    fun saveJson(jsonList: TaskToJson) {
-        jsonFile.writeText(taskAdapter.toJson(jsonList))
+    fun saveJson(taskList: MutableList<MutableMap<String, String>>) {
+        file.writeText(taskListAdapter.toJson(taskList))
     }
 
-    fun readJson(jsonList: TaskToJson): MutableList<MutableMap<String, String>> {
+    fun readJson(): MutableList<MutableMap<String, String>> {
         return try {
-            taskAdapter.fromJson(jsonFile.readText())?.taskList!!
+            taskListAdapter.fromJson(file.readText())!!
         } catch (_: IOException) {
-            jsonList.taskList
+           mutableListOf()
         }
     }
 
