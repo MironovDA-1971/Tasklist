@@ -42,7 +42,7 @@ fun curDate(data: String?): String {
     var period = "O"
     val date = data?.split("-")?.toMutableList()
     val taskDate = LocalDate(date?.get(0)!!.toInt(), date[1].toInt(), date[2].toInt())
-    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.of("UTC+0")).date
+    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.of("UTC+4")).date
     val numberOfDays = taskDate.let { currentDate.daysUntil(it) }
     if (numberOfDays == 0) period = "T"
     else if (numberOfDays > 0) period = "I"

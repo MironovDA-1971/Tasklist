@@ -2,7 +2,9 @@ package tasklist
 
 fun main() {
     val message = PrintMessage()
-    val taskList = mutableListOf<MutableMap<String, String>>()
+    val jsonRead = TaskToJson(mutableListOf())
+    val rsJoson = ReadSaveJoson()
+    val taskList = rsJoson.readJson(jsonRead)
 
     while (true) {
         println(message.start)
@@ -15,5 +17,8 @@ fun main() {
             else -> println(message.invalidInput)
         }
     }
+
+    val jsonSave = TaskToJson(taskList)
+    rsJoson.saveJson(jsonSave)
     println(message.msgEnd)
 }

@@ -1,44 +1,31 @@
 package tasklist
 
-import com.squareup.moshi.*
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.io.File
+import java.io.IOException
 
-class MyTask(var date: String,
-              var time: String,
-              var urgency: String, 
-              var deadline: String,
-              var taskList: Array<String>
-              ) {
-}
-fun saveJson() {
-    val jsonFile = File("tasklist.json")
-    val moshi: Moshi = Moshi.Builder()
+class TaskToJson(val taskList: MutableList<MutableMap<String, String>>)
+
+class ReadSaveJoson {
+    private val jsonFile = File("tasklist.json")
+    private val moshi: Moshi = Moshi.Builder()
         .add(KotlinJsonAdapterFactory())
         .build()
-    val businessAdapter = moshi.adapter(MyTask::class.java).indent(" ")
-   /*
-    arrayTasks = taskList.toTypedArray()
+    private val taskAdapter: JsonAdapter<TaskToJson> = moshi.adapter(TaskToJson::class.java)
 
-    // создадим очередной объект класса
-    var i = 0
-    while (i in 0 until arrayTasks.size) {
-        // составим список дел в очередном задании
-        var s = i + 1
-        var nextTask = emptyArray<String>()
-        while (arrayTasks[s].isNotEmpty()) {
-            nextTask += arrayTasks[s]
-            s++
-        }
-        s++
-        val nextRecord =  MyTasks<String>(
-            arrayTasks[i].substring(0, 10),   // дата
-            arrayTasks[i].substring(11, 16), // время
-            arrayTasks[i].substring(17, 18), // приоритет
-            arrayTasks[i].substring(19, 20),  // срок
-            nextTask)  // список дел в задании
-        i = s
-        jsonFile.appendText(businessAdapter.indent("  ").toJson(nextRecord))
+
+    fun saveJson(jsonList: TaskToJson) {
+        jsonFile.writeText(taskAdapter.toJson(jsonList))
     }
-    */
+
+    fun readJson(jsonList: TaskToJson): MutableList<MutableMap<String, String>> {
+        return try {
+            taskAdapter.fromJson(jsonFile.readText())?.taskList!!
+        } catch (_: IOException) {
+            jsonList.taskList
+        }
+    }
+
 }
